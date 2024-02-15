@@ -219,7 +219,7 @@ class QuestionsRetrieveAPIView(generics.ListAPIView):
         category = self.kwargs['category']
         category_name = Category.objects.get(pk = category).name
         # make it get it with the id insted of the category name
-        test_length = self.all_test_lenghts.get(category_name, 0)
+        test_length = self.all_test_lenghts.get(category_name, 10)
         profile = Profile.objects.get(user =request.user)
         try:
             avg_score_object = AverageScore.objects.get(profile=profile, category=category)
