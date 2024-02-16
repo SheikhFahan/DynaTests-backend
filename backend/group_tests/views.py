@@ -7,6 +7,7 @@ from rest_framework import permissions
 
 from api.permissions import IsInstitute, IsInstituteAndOwner, IsStudent
 
+import visualization_api_view
 from .serializers import (
     GroupTestSerializer, CategorySerializer, 
     SubTestPasswordSerializer, CombinedCategorySerializer,

@@ -139,7 +139,7 @@ class SubTestSessionPassword(models.Model):
 
 
 class EasyQuestion(models.Model):
-    test = models.ForeignKey(GroupTest, on_delete=models.CASCADE)
+    test = models.ForeignKey(GroupTest, on_delete=models.CASCADE, related_name = 'easy_question')
     text = models.TextField()
     category = models.ForeignKey(GroupTestCategory, on_delete=models.CASCADE, null = True, blank = True, default= 'Coding')
 
@@ -147,18 +147,11 @@ class EasyQuestion(models.Model):
         self.category = self.test.category
         super().save(*args, **kwargs)
 
-
-
-    # generic-foreign-key
-    # content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE)
-    # object_id = models.PositiveIntegerField()
-    # test = GenericForeignKey('content_type', 'object_id')
-
     def __str__(self):
         return self.text[:50]
     
 class MediumQuestion(models.Model):
-    test = models.ForeignKey(GroupTest, on_delete=models.CASCADE)
+    test = models.ForeignKey(GroupTest, on_delete=models.CASCADE, related_name = 'madium_question')
     text = models.TextField()    
     category = models.ForeignKey(GroupTestCategory, on_delete=models.CASCADE, null = True, blank = True, default= 'Coding')
 
@@ -170,7 +163,7 @@ class MediumQuestion(models.Model):
         return self.text[:50]
     
 class HardQuestion(models.Model):
-    test = models.ForeignKey(GroupTest, on_delete=models.CASCADE)
+    test = models.ForeignKey(GroupTest, on_delete=models.CASCADE, related_name = 'hards_question')
     text = models.TextField()
     category = models.ForeignKey(GroupTestCategory, on_delete=models.CASCADE, null = True, blank = True, default= 'Coding')
 
