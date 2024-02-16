@@ -249,12 +249,9 @@ class GroupTestListCreateAPIView(generics.ListCreateAPIView):
 
     def create(self, request, *args, **kwargs):
         data = request.data
-        serializer = GroupTestSerializer(data = data, context = {'request', request})
-
+        serializer = GroupTestSerializer(data = data, context = {'request' : request})
         if serializer.is_valid():
-            serializer.save(user = request.user)
-            group_test_object = serializer.save(user=self.request.user)
-
+            group_test_object = serializer.save(user=request.user)
             # Include the 'pk' of the created object in the response incase password in needed to be saved
             response_data = {
                 'pk': group_test_object.pk,
@@ -263,6 +260,7 @@ class GroupTestListCreateAPIView(generics.ListCreateAPIView):
             
             return Response(response_data, status=status.HTTP_201_CREATED)
         else:
+            print(serializer.errors)
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
