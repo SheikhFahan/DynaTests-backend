@@ -451,10 +451,9 @@ class SubmitAnswersAPIView(APIView):
     
 class QuestionsCreateAPIView(generics.CreateAPIView):
     serializer_class = CreateQuestionsSerializer
-    # permission_classes = [permissions.IsAdminUser]
+    permission_classes = [permissions.IsAdminUser]
 
     def create(self, request, *args, **kwargs):
-        print(" it is working ")
         data = request.data
         serializer = CreateQuestionsSerializer(data = data, context = {'request' : request})
         print(data)
