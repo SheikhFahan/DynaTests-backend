@@ -249,7 +249,7 @@ class GroupTestListCreateAPIView(generics.ListCreateAPIView):
 
     def create(self, request, *args, **kwargs):
         data = request.data
-        serializer = GroupTestSerializer(data = data)
+        serializer = GroupTestSerializer(data = data, context = {'request', request})
 
         if serializer.is_valid():
             serializer.save(user = request.user)
