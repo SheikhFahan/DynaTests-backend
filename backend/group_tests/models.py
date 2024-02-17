@@ -128,7 +128,7 @@ class SubTestSessionPassword(models.Model):
     password = models.CharField(max_length=100)
     
     def __str__(self) -> str:
-        return f'{self.test.pk} test by {self.test.user}'
+        return f'{self.session.pk} test by {self.session.user}'
     
     def authenticate_password(self,  raw_password):
         if check_password(raw_password, self.password):
@@ -139,28 +139,21 @@ class SubTestSessionPassword(models.Model):
 
 
 class EasyQuestion(models.Model):
-    test = models.ForeignKey(GroupTest, on_delete=models.CASCADE)
+    test = models.ForeignKey(GroupTest, on_delete=models.CASCADE, related_name = 'easy_question')
     text = models.TextField()
-    category = models.ForeignKey(GroupTestCategory, on_delete=models.CASCADE, null = True, blank = True, default= 'Coding')
+    category = models.ForeignKey(GroupTestCategory, on_delete=models.CASCADE, null = True, blank = True, related_name = 'easy_question')
 
     def save(self, *args, **kwargs):
         self.category = self.test.category
         super().save(*args, **kwargs)
 
-
-
-    # generic-foreign-key
-    # content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE)
-    # object_id = models.PositiveIntegerField()
-    # test = GenericForeignKey('content_type', 'object_id')
-
     def __str__(self):
         return self.text[:50]
     
 class MediumQuestion(models.Model):
-    test = models.ForeignKey(GroupTest, on_delete=models.CASCADE)
+    test = models.ForeignKey(GroupTest, on_delete=models.CASCADE, related_name = 'medium_question')
     text = models.TextField()    
-    category = models.ForeignKey(GroupTestCategory, on_delete=models.CASCADE, null = True, blank = True, default= 'Coding')
+    category = models.ForeignKey(GroupTestCategory, on_delete=models.CASCADE, null = True, blank = True, related_name = 'medium_question')
 
     def save(self, *args, **kwargs):
         self.category = self.test.category
@@ -170,9 +163,9 @@ class MediumQuestion(models.Model):
         return self.text[:50]
     
 class HardQuestion(models.Model):
-    test = models.ForeignKey(GroupTest, on_delete=models.CASCADE)
+    test = models.ForeignKey(GroupTest, on_delete=models.CASCADE, related_name = 'hard_question')
     text = models.TextField()
-    category = models.ForeignKey(GroupTestCategory, on_delete=models.CASCADE, null = True, blank = True, default= 'Coding')
+    category = models.ForeignKey(GroupTestCategory, on_delete=models.CASCADE, null = True, blank = True, related_name = 'hard_question')
 
     def save(self, *args, **kwargs):
         self.category = self.test.category

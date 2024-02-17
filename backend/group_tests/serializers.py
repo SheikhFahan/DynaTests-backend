@@ -10,7 +10,7 @@ from .models import (GroupTest, GroupTestCategory, GroupTestCombinedCategory,
 )
                      
 class GroupTestSerializer(serializers.ModelSerializer):
-    # for creating of group test
+# for creating of group test
     class Meta:
         model = GroupTest
         fields = [
@@ -18,34 +18,42 @@ class GroupTestSerializer(serializers.ModelSerializer):
             'name',
             'description',
             'category',
+
 ]
     def validate(self, data):
         # Manually validate the files
-        easy_test_file = self.context['request'].FILES.get('easy_test_file')
-        medium_test_file = self.context['request'].FILES.get('medium_test_file')
-        hard_test_file = self.context['request'].FILES.get('hard_test_file')
+        easy_test_file = self.context['request'].FILES.get('easy_test_file', None)
+        medium_test_file = self.context['request'].FILES.get('medium_test_file', None)
+        hard_test_file = self.context['request'].FILES.get('hard_test_file', None)
 
         if not (easy_test_file or medium_test_file or hard_test_file):
             raise serializers.ValidationError("Need at least one of the files required.")
-        
         return data
         
     def create(self, validated_data):
-        easy_test_file = validated_data.pop('easy_test_file', None)
-        medium_test_file = validated_data.pop('medium_test_file', None)
-        hard_test_file = validated_data.pop('hard_test_file', None)
+        instance = super().create(validated_data)
+        
+        self.post_create(instance)
+        
+        return instance
+    
+    def post_create(self, instance):
+        test_instance = instance
+        easy_test_file = self.context['request'].FILES.get('easy_test_file', None)
+        medium_test_file = self.context['request'].FILES.get('medium_test_file', None)
+        hard_test_file = self.context['request'].FILES.get('hard_test_file', None)
 
         if easy_test_file:
-            self.import_quiz_from_excel(easy_test_file, 'easy')
+            self.import_quiz_from_excel(test_instance, easy_test_file, 'easy')
         if medium_test_file:
-            self.import_quiz_from_excel(medium_test_file, 'medium')
+            self.import_quiz_from_excel(test_instance,medium_test_file, 'medium')
         if hard_test_file:
-            self.import_quiz_from_excel(hard_test_file, 'hard')
-        return super().create(validated_data)
+            self.import_quiz_from_excel(test_instance, hard_test_file, 'hard')
+        pass  # Placeholder, replace with your logic
     
-    def import_quiz_from_excel(self, test_file, difficulty):
+    def import_quiz_from_excel(self,group_test_instance,  test_file, difficulty):
         # read the excel file
-        df = pd.read_excel(test_file.path)
+        df = pd.read_excel(test_file)
 
         # iterate over the each row
         for index, row in df.iterrows():
@@ -55,21 +63,21 @@ class GroupTestSerializer(serializers.ModelSerializer):
             correct_answer = row['Answer']
 
             if(difficulty == 'easy'):
-                question = EasyQuestion.objects.get_or_create(test=self, text=question_text)
+                question = EasyQuestion.objects.get_or_create(test=group_test_instance, text=question_text)
                 choice_1 = ChoiceForEasyQ.objects.get_or_create(question=question[0], text=choice1, is_correct=correct_answer == 'A')
                 choice_2 = ChoiceForEasyQ.objects.get_or_create(question=question[0], text=choice2, is_correct=correct_answer == 'B')
                 choice_3 = ChoiceForEasyQ.objects.get_or_create(question=question[0], text=choice3, is_correct=correct_answer == 'C')
                 choice_4 = ChoiceForEasyQ.objects.get_or_create(question=question[0], text=choice4, is_correct=correct_answer == 'D')
                 
             elif(difficulty == 'medium'):
-                question = MediumQuestion.objects.get_or_create(test=self, text=question_text)
+                question = MediumQuestion.objects.get_or_create(test=group_test_instance, text=question_text)
                 choice_1 = ChoiceForMediumQ.objects.get_or_create(question=question[0], text=choice1, is_correct=correct_answer == 'A')
                 choice_2 = ChoiceForMediumQ.objects.get_or_create(question=question[0], text=choice2, is_correct=correct_answer == 'B')
                 choice_3 = ChoiceForMediumQ.objects.get_or_create(question=question[0], text=choice3, is_correct=correct_answer == 'C')
                 choice_4 = ChoiceForMediumQ.objects.get_or_create(question=question[0], text=choice4, is_correct=correct_answer == 'D')
 
             elif(difficulty =='hard'):
-                question = HardQuestion.objects.get_or_create(test=self, text=question_text)
+                question = HardQuestion.objects.get_or_create(test=group_test_instance, text=question_text)
                 choice_1 = ChoiceForHardQ.objects.get_or_create(question=question[0], text=choice1, is_correct=correct_answer == 'A')
                 choice_2 = ChoiceForHardQ.objects.get_or_create(question=question[0], text=choice2, is_correct=correct_answer == 'B')
                 choice_3 = ChoiceForHardQ.objects.get_or_create(question=question[0], text=choice3, is_correct=correct_answer == 'C')

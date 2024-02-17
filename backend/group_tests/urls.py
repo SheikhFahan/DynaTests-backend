@@ -9,8 +9,12 @@ from .views import (
     CategorySessionRetrieveAPIView, CategorySessionAuthentication, CombinedCategorySessionRetrieveAPIView,
     CombinedCategorySessionAuthentication, SubmitCombinationAnswersAPIView, SubTestSessionListCreateAPIView,
     SubTestSessionAuthentication, SubTestSessionRetrieveAPIView, SubTestSessionQuestionsListAPIView,
-    SubTestAnswerSubmitAPIView
-    
+    SubTestAnswerSubmitAPIView 
+)
+
+from .visualization_api_view import (
+    SubTestListAPIVIew, SubTestDetailsListAPIView,FocusedTestListAPIVIew,
+    FocusedTestDetailsListAPIView
 )
 
 urlpatterns = [
@@ -46,8 +50,15 @@ urlpatterns = [
     path('authenticate_session_c/', CategorySessionAuthentication.as_view()),
     path('authenticate_session_cc/', CombinedCategorySessionAuthentication.as_view()),
 
-
     # path('sub_group_test/', GroupTestListCreateAPIView.as_view()),
     path('<int:category>/get_test/',QuestionsRetrieveAPIView.as_view()), 
     path('submit_ans/', SubmitAnswersAPIView.as_view() ),
+    # db details for questions and categories
+    path('subtest_data/', SubTestListAPIVIew.as_view() ),
+    path('subtest_detailed_data/', SubTestDetailsListAPIView.as_view() ),
+
+    path('focused_test_data/', FocusedTestListAPIVIew.as_view() ),
+    path('focused_test_detailed_data/', FocusedTestDetailsListAPIView.as_view() ),
+
+
 ]
