@@ -141,7 +141,7 @@ class SubTestSessionPassword(models.Model):
 class EasyQuestion(models.Model):
     test = models.ForeignKey(GroupTest, on_delete=models.CASCADE, related_name = 'easy_question')
     text = models.TextField()
-    category = models.ForeignKey(GroupTestCategory, on_delete=models.CASCADE, null = True, blank = True, default= 'Coding')
+    category = models.ForeignKey(GroupTestCategory, on_delete=models.CASCADE, null = True, blank = True, related_name = 'easy_question')
 
     def save(self, *args, **kwargs):
         self.category = self.test.category
@@ -153,7 +153,7 @@ class EasyQuestion(models.Model):
 class MediumQuestion(models.Model):
     test = models.ForeignKey(GroupTest, on_delete=models.CASCADE, related_name = 'medium_question')
     text = models.TextField()    
-    category = models.ForeignKey(GroupTestCategory, on_delete=models.CASCADE, null = True, blank = True, default= 'Coding')
+    category = models.ForeignKey(GroupTestCategory, on_delete=models.CASCADE, null = True, blank = True, related_name = 'medium_question')
 
     def save(self, *args, **kwargs):
         self.category = self.test.category
@@ -165,7 +165,7 @@ class MediumQuestion(models.Model):
 class HardQuestion(models.Model):
     test = models.ForeignKey(GroupTest, on_delete=models.CASCADE, related_name = 'hard_question')
     text = models.TextField()
-    category = models.ForeignKey(GroupTestCategory, on_delete=models.CASCADE, null = True, blank = True, default= 'Coding')
+    category = models.ForeignKey(GroupTestCategory, on_delete=models.CASCADE, null = True, blank = True, related_name = 'hard_question')
 
     def save(self, *args, **kwargs):
         self.category = self.test.category
