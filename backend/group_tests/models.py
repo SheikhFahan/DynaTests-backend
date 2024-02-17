@@ -128,7 +128,7 @@ class SubTestSessionPassword(models.Model):
     password = models.CharField(max_length=100)
     
     def __str__(self) -> str:
-        return f'{self.test.pk} test by {self.test.user}'
+        return f'{self.session.pk} test by {self.session.user}'
     
     def authenticate_password(self,  raw_password):
         if check_password(raw_password, self.password):
@@ -151,7 +151,7 @@ class EasyQuestion(models.Model):
         return self.text[:50]
     
 class MediumQuestion(models.Model):
-    test = models.ForeignKey(GroupTest, on_delete=models.CASCADE, related_name = 'madium_question')
+    test = models.ForeignKey(GroupTest, on_delete=models.CASCADE, related_name = 'medium_question')
     text = models.TextField()    
     category = models.ForeignKey(GroupTestCategory, on_delete=models.CASCADE, null = True, blank = True, default= 'Coding')
 
@@ -163,7 +163,7 @@ class MediumQuestion(models.Model):
         return self.text[:50]
     
 class HardQuestion(models.Model):
-    test = models.ForeignKey(GroupTest, on_delete=models.CASCADE, related_name = 'hards_question')
+    test = models.ForeignKey(GroupTest, on_delete=models.CASCADE, related_name = 'hard_question')
     text = models.TextField()
     category = models.ForeignKey(GroupTestCategory, on_delete=models.CASCADE, null = True, blank = True, default= 'Coding')
 

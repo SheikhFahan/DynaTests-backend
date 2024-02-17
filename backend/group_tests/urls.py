@@ -10,8 +10,9 @@ from .views import (
     CombinedCategorySessionAuthentication, SubmitCombinationAnswersAPIView, SubTestSessionListCreateAPIView,
     SubTestSessionAuthentication, SubTestSessionRetrieveAPIView, SubTestSessionQuestionsListAPIView,
     SubTestAnswerSubmitAPIView
-    
 )
+
+from .visualization_api_view import SubTestsListAPIVIew, SubTestsDetailsListAPIView
 
 urlpatterns = [
     # for creating and listing group tests and categories for the tests
@@ -46,8 +47,11 @@ urlpatterns = [
     path('authenticate_session_c/', CategorySessionAuthentication.as_view()),
     path('authenticate_session_cc/', CombinedCategorySessionAuthentication.as_view()),
 
-
     # path('sub_group_test/', GroupTestListCreateAPIView.as_view()),
     path('<int:category>/get_test/',QuestionsRetrieveAPIView.as_view()), 
     path('submit_ans/', SubmitAnswersAPIView.as_view() ),
+
+    path('subtest_data/', SubTestsListAPIVIew.as_view() ),
+    path('subtest_detailed_data/', SubTestsDetailsListAPIView.as_view() ),
+
 ]
