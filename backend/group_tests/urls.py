@@ -13,8 +13,8 @@ from .views import (
 )
 
 from .visualization_api_view import (
-    SubTestListAPIVIew, SubTestDetailsListAPIView,FocusedTestListAPIVIew,
-    FocusedTestDetailsListAPIView
+    SubTestListAPIVIew, SubTestDetailsListAPIView,GroupCategoryInfoListAPIVIew,
+    GroupCategoryDetailsListAPIView, CCInfoListAPIView
 )
 
 urlpatterns = [
@@ -57,8 +57,11 @@ urlpatterns = [
     path('subtest_data/', SubTestListAPIVIew.as_view() ),
     path('subtest_detailed_data/', SubTestDetailsListAPIView.as_view() ),
 
-    path('focused_test_data/', FocusedTestListAPIVIew.as_view() ),
-    path('focused_test_detailed_data/', FocusedTestDetailsListAPIView.as_view() ),
+    path('category_test_data/', GroupCategoryInfoListAPIVIew.as_view() ),
+    path('category_test_detailed_data/', GroupCategoryDetailsListAPIView.as_view() ),
+
+    path('comprehensive_test_data/', CCInfoListAPIView.as_view() ),
+
 
 
 ]

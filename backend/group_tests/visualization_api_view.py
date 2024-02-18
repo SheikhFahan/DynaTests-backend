@@ -1,9 +1,11 @@
 from rest_framework.response import Response
 from rest_framework import generics
-from django.db.models import F
-
-from .visualization_api_serializer import QuestionsDataSerializer, QuestionsDataDetailSerializer
-from .models import GroupTest, GroupTestCategory
+from django.db.models import Value, CharField,  F
+from django.db.models.functions import Concat
+from collections import defaultdict
+from .visualization_api_serializer import (QuestionsDataSerializer, QuestionsDataDetailSerializer,
+                                           CCDataSerializer )
+from .models import GroupTest, GroupTestCategory, GroupTestCombinedCategory
 
 from api.permissions import IsInstitute, IsInstituteAndOwner, IsStudent
 
@@ -48,7 +50,7 @@ class SubTestDetailsListAPIView(generics.ListAPIView):
         serializer = self.get_serializer(queryset, many = True)
         return Response(serializer.data)
     
-class FocusedTestListAPIVIew(generics.ListAPIView):
+class GroupCategoryInfoListAPIVIew(generics.ListAPIView):
     """
     gives the total number of subtests per category
     """
@@ -57,9 +59,8 @@ class FocusedTestListAPIVIew(generics.ListAPIView):
 
     def get_queryset(self):
         user  = self.request.user
-        # can put an if block over here to for dry
+        # the pk might give errors because of the annotation problems
         category_counts = GroupTestCategory.objects.filter(user = 5).values(category_name = F('name'), pk=F('pk'))
-        print(category_counts)
         return category_counts
     
     def list(self, request, *args, **kwargs):
@@ -67,7 +68,7 @@ class FocusedTestListAPIVIew(generics.ListAPIView):
         serializer = self.get_serializer(queryset, many = True)
         return Response(serializer.data)
     
-class FocusedTestDetailsListAPIView(generics.ListAPIView):
+class GroupCategoryDetailsListAPIView(generics.ListAPIView):
     """
         gives the total number of question per subtest according to the difficulty
     """
@@ -88,3 +89,32 @@ class FocusedTestDetailsListAPIView(generics.ListAPIView):
         queryset = self.get_queryset()
         serializer = self.get_serializer(queryset, many = True)
         return Response(serializer.data)
+
+class CCInfoListAPIView(generics.ListAPIView):
+    serializer_class = CCDataSerializer
+    # permission_classes = [IsInstitute]
+    def get_queryset(self):
+        user  = self.request.user
+        merged_results = defaultdict(list)
+        queryset = GroupTestCombinedCategory.objects.filter(user = user).values(category_name = F('name'), pk=F('pk'), associated_categories_list=F('associated_categories__name'))
+        for item in queryset:
+            key = (item['category_name'], item['pk'])
+            merged_results[key].append(item['associated_categories_list'])
+
+        print(merged_results)
+        merged_queryset = [
+            {
+                'category_name': key[0],
+                'pk': key[1],
+                'associated_categories_list': ', '.join(values)
+            }
+            for key, values in merged_results.items()
+        ]
+        return merged_queryset
+    
+    def list(self, request, *args, **kwargs):
+        queryset = self.get_queryset()
+        serializer = self.get_serializer(queryset, many = True)
+        return Response(serializer.data)
+    
+    
