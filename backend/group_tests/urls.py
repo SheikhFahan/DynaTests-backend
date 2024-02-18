@@ -14,7 +14,8 @@ from .views import (
 
 from .visualization_api_view import (
     SubTestListAPIVIew, SubTestDetailsListAPIView,GroupCategoryInfoListAPIVIew,
-    GroupCategoryDetailsListAPIView, CCInfoListAPIView
+    GroupCategoryDetailsListAPIView, CCInfoListAPIView,SubTestSessionsDataListAPIView,
+    GroupTestSessionsDataListAPIView, CCGroupTestSessionsDataListAPIView
 )
 
 urlpatterns = [
@@ -61,6 +62,11 @@ urlpatterns = [
     path('category_test_detailed_data/', GroupCategoryDetailsListAPIView.as_view() ),
 
     path('comprehensive_test_data/', CCInfoListAPIView.as_view() ),
+
+    # test sessions data visualization
+    path('subtest_session_data/<int:session>/', SubTestSessionsDataListAPIView.as_view() ),
+    path('category_session_data/<int:session>/', GroupTestSessionsDataListAPIView.as_view() ),
+    path('cc_session_data/<int:session>/', CCGroupTestSessionsDataListAPIView.as_view() ),
 
 
 

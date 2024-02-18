@@ -204,3 +204,46 @@ class GroupTestPassword(models.Model):
     test = models.OneToOneField(GroupTestCombinedCategory, on_delete=models.CASCADE, related_name='password_info')
     password = models.CharField(max_length=100)
     
+class GroupTestMarksLibrary(models.Model):
+    """
+    saves tests info on sessions
+    """
+    institute = models.ForeignKey(User, related_name = "institute_group_test_marks_lib",  on_delete=models.CASCADE)
+    candidate = models.ForeignKey(User ,related_name = "candidate_group_test_marks_lib", on_delete=models.CASCADE)
+    score = models.IntegerField()
+    session = models.ForeignKey(CategoryTestSession, on_delete=models.CASCADE)
+    timestamp = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        unique_together = ['session', 'candidate', 'institute']
+
+    def __str__(self) :
+        return f"{self.institute}, {self.candidate}, {self.session}, {self.score}"
+
+
+class CombinedGroupTestMarksLibrary(models.Model):
+    institute = models.ForeignKey(User, related_name = "institute_group_test_combined_scores",  on_delete=models.CASCADE)
+    candidate = models.ForeignKey(User ,related_name = "candidate_group_test_scores", on_delete=models.CASCADE)
+    score = models.IntegerField()
+    session = models.ForeignKey(CombinedCategoryTestSession, on_delete=models.CASCADE)
+    timestamp = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        unique_together = ['session', 'candidate', 'institute']
+
+    def __str__(self) :
+        return f"{self.institute}, {self.candidate}, {self.session}, {self.score}"
+    
+class SubTestsMarksLibrary(models.Model):
+    institute = models.ForeignKey(User, related_name = "institute_subtest_test_marks",  on_delete=models.CASCADE)
+    candidate = models.ForeignKey(User ,related_name = "candidate_subtest_test_marks", on_delete=models.CASCADE)
+    score = models.IntegerField()
+    session = models.ForeignKey(SubTestSession, on_delete=models.CASCADE)
+    timestamp = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        unique_together = ['session', 'candidate', 'institute']
+
+    def __str__(self) :
+        return f"{self.institute}, {self.candidate}, {self.session}, {self.score}"
+    

@@ -22,3 +22,8 @@ class QuestionsDataDetailSerializer(serializers.Serializer):
     total_easy = serializers.IntegerField()
     total_medium = serializers.IntegerField()
     total_hard= serializers.IntegerField()
+
+class SessionScoresSerializer(serializers.Serializer):
+    name = serializers.CharField(max_length = 100)
+    score = serializers.IntegerField()
+    
