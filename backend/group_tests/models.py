@@ -203,6 +203,30 @@ class GroupTestPassword(models.Model):
     # stores password for the combined categorical tests for a group of people
     test = models.OneToOneField(GroupTestCombinedCategory, on_delete=models.CASCADE, related_name='password_info')
     password = models.CharField(max_length=100)
+
+class SubTestSessionsData(models.Model):
+    user = models.ForeignKey(User, on_delete = models.CASCADE)
+    session = models.ForeignKey(SubTestSession, on_delete = models.SET_NULL, null = True)
+    avg_score = models.IntegerField
+
+    def __str__(self) -> str:
+        return f'{self.user} {self.session} {self.avg_score}'
+    
+class GroupTestSessionsData(models.Model):
+    user = models.ForeignKey(User, on_delete = models.CASCADE)
+    session = models.ForeignKey(CategoryTestSession, on_delete = models.SET_NULL, null = True)
+    avg_score = models.IntegerField
+
+    def __str__(self) -> str:
+        return f'{self.user} {self.session} {self.avg_score}'
+
+class CCTestSessionsData(models.Model):
+    user = models.ForeignKey(User, on_delete = models.CASCADE)
+    session = models.ForeignKey(CombinedCategoryTestSession, on_delete = models.SET_NULL, null = True)
+    avg_score = models.IntegerField
+
+    def __str__(self) -> str:
+        return f'{self.user} {self.session} {self.avg_score}'
     
 class GroupTestMarksLibrary(models.Model):
     """

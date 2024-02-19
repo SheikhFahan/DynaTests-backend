@@ -14,8 +14,9 @@ from .views import (
 
 from .visualization_api_view import (
     SubTestListAPIVIew, SubTestDetailsListAPIView,GroupCategoryInfoListAPIVIew,
-    GroupCategoryDetailsListAPIView, CCInfoListAPIView,SubTestSessionsDataListAPIView,
-    GroupTestSessionsDataListAPIView, CCGroupTestSessionsDataListAPIView
+    GroupCategoryDetailsListAPIView, CCInfoListAPIView,SubTestSessionsListAPIView,
+    GroupTestCategorySessionsListAPIView, CCGroupTestSessionsListAPIView, SubTestSessionsDetailedDataListAPIView,
+    GroupTestSessionsDetailedDataListAPIView, CCGroupTestSessionsDetailedDataListAPIView
 )
 
 urlpatterns = [
@@ -23,7 +24,6 @@ urlpatterns = [
     path('group_test_combined_categories/', GroupTestCombinedCategoryListCreateAPIView.as_view()),
     path('group_test_categories/', GroupTestCategoryListCreateAPIView.as_view()),
     path('group_sub_test/', GroupTestListCreateAPIView.as_view()),
-
     # creating and listing  test sessions
     # add pagination for fetch 
     path('session_by_subtest/', SubTestSessionListCreateAPIView.as_view()),
@@ -45,29 +45,25 @@ urlpatterns = [
     path('session_subtest_data/<int:user_id>/<int:pk>/', SubTestSessionRetrieveAPIView.as_view()),
     path('session_category_data/<int:user_id>/<int:pk>/', CategorySessionRetrieveAPIView.as_view()),
     path('session_combined_category_data/<int:user_id>/<int:pk>/', CombinedCategorySessionRetrieveAPIView.as_view()),
-
     # check  password for the sessions -> might add inst_id later if the data grows a lot
     path('authenticate_session_subtest/', SubTestSessionAuthentication.as_view()),
     path('authenticate_session_c/', CategorySessionAuthentication.as_view()),
     path('authenticate_session_cc/', CombinedCategorySessionAuthentication.as_view()),
-
     # path('sub_group_test/', GroupTestListCreateAPIView.as_view()),
     path('<int:category>/get_test/',QuestionsRetrieveAPIView.as_view()), 
     path('submit_ans/', SubmitAnswersAPIView.as_view() ),
     # db details for questions and categories
     path('subtest_data/', SubTestListAPIVIew.as_view() ),
     path('subtest_detailed_data/', SubTestDetailsListAPIView.as_view() ),
-
     path('category_test_data/', GroupCategoryInfoListAPIVIew.as_view() ),
     path('category_test_detailed_data/', GroupCategoryDetailsListAPIView.as_view() ),
-
     path('comprehensive_test_data/', CCInfoListAPIView.as_view() ),
-
+    # test sessions list
+    path('subtest_session_list/', SubTestSessionsListAPIView.as_view() ),
+    path('category_session_list/', GroupTestCategorySessionsListAPIView.as_view() ),
+    path('cc_session__list/', CCGroupTestSessionsListAPIView.as_view() ),
     # test sessions data visualization
-    path('subtest_session_data/<int:session>/', SubTestSessionsDataListAPIView.as_view() ),
-    path('category_session_data/<int:session>/', GroupTestSessionsDataListAPIView.as_view() ),
-    path('cc_session_data/<int:session>/', CCGroupTestSessionsDataListAPIView.as_view() ),
-
-
-
+    path('subtest_session_data/<int:session>/', SubTestSessionsDetailedDataListAPIView.as_view() ),
+    path('category_session_data/<int:session>/', GroupTestSessionsDetailedDataListAPIView.as_view() ),
+    path('cc_session_data/<int:session>/', CCGroupTestSessionsDetailedDataListAPIView.as_view() ),
 ]

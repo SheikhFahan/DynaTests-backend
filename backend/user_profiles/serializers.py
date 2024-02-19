@@ -47,7 +47,7 @@ class AttemptedCategoryCountsListSerializer(serializers.Serializer):
 
 
 class TestHistorySerializer(serializers.Serializer):
-    category_name = serializers.CharField(max_length = 30)
+    category_name = serializers.CharField(max_length = 50)
     test_score = serializers.IntegerField()
     date = serializers.DateTimeField()
 
