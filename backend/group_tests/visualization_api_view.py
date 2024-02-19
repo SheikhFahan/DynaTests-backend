@@ -5,10 +5,11 @@ from django.db.models import F, Count
 from collections import defaultdict
 
 from .visualization_api_serializer import (QuestionsDataSerializer, QuestionsDataDetailSerializer,
-                                           CCDataSerializer, SessionScoresSerializer, GenericSingularFieldSerializer)
+                                           CCDataSerializer, SessionScoresSerializer, SessionsListSerializer)
 from .models import GroupTest, GroupTestCategory, GroupTestCombinedCategory
 from .models import (
-    SubTestsMarksLibrary, GroupTestMarksLibrary, CombinedGroupTestMarksLibrary
+    SubTestsMarksLibrary, GroupTestMarksLibrary, CombinedGroupTestMarksLibrary,
+    SubTestSession, CategoryTestSession, CombinedCategoryTestSession
 )
 
 from api.permissions import IsInstitute, IsInstituteAndOwner, IsStudent
@@ -124,12 +125,12 @@ class CCInfoListAPIView(generics.ListAPIView):
     
 
 class SubTestSessionsListAPIView(generics.ListAPIView):
-    serializer_class = GenericSingularFieldSerializer
+    serializer_class = SessionsListSerializer
     permission_classes = [IsInstitute]
 
     def get_queryset(self):
         institute = self.request.user
-        sessions = GroupTest.objects.filter(user = 5)
+        sessions = SubTestSession.objects.filter(user = institute)
         print(sessions)
         return  sessions
     
@@ -139,12 +140,12 @@ class SubTestSessionsListAPIView(generics.ListAPIView):
         return Response(serializer.data)
     
 class GroupTestCategorySessionsListAPIView(generics.ListAPIView):
-    serializer_class = GenericSingularFieldSerializer
+    serializer_class = SessionsListSerializer
     permission_classes = [IsInstitute]
 
     def get_queryset(self):
         institute = self.request.user
-        sessions = GroupTestCategory.objects.filter(user = 5)
+        sessions = CategoryTestSession.objects.filter(user = institute)
         print(sessions)
         return  sessions
     
@@ -154,12 +155,12 @@ class GroupTestCategorySessionsListAPIView(generics.ListAPIView):
         return Response(serializer.data)
 
 class CCGroupTestSessionsListAPIView(generics.ListAPIView):
-    serializer_class = GenericSingularFieldSerializer
+    serializer_class = SessionsListSerializer
     permission_classes = [IsInstitute]
 
     def get_queryset(self):
         institute = self.request.user
-        sessions = GroupTestCombinedCategory.objects.filter(user = 5)
+        sessions = CombinedCategoryTestSession.objects.filter(user = institute)
         print(sessions)
         return  sessions
     

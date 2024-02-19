@@ -1,6 +1,7 @@
 from rest_framework import serializers
 
-class GenericSingularFieldSerializer(serializers.Serializer):
+class SessionsListSerializer(serializers.Serializer):
+    pk = serializers.IntegerField()
     name  = serializers.CharField(max_length = 100)
 
 class QuestionsDataSerializer(serializers.Serializer):
