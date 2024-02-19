@@ -1,11 +1,16 @@
 from rest_framework.response import Response
 from rest_framework import generics
-from django.db.models import Value, CharField,  F
-from django.db.models.functions import Concat
+from rest_framework.views import APIView
+from django.db.models import F, Count
 from collections import defaultdict
+
 from .visualization_api_serializer import (QuestionsDataSerializer, QuestionsDataDetailSerializer,
-                                           CCDataSerializer )
+                                           CCDataSerializer, SessionScoresSerializer, SessionsListSerializer)
 from .models import GroupTest, GroupTestCategory, GroupTestCombinedCategory
+from .models import (
+    SubTestsMarksLibrary, GroupTestMarksLibrary, CombinedGroupTestMarksLibrary,
+    SubTestSession, CategoryTestSession, CombinedCategoryTestSession
+)
 
 from api.permissions import IsInstitute, IsInstituteAndOwner, IsStudent
 
@@ -20,7 +25,8 @@ class SubTestListAPIVIew(generics.ListAPIView):
     def get_queryset(self):
         user  = self.request.user
         # can put an if block over here to for dry
-        category_counts = GroupTest.objects.filter(user = user).values(category_name = F('category__name'), pk=F('category_id'))
+        category_counts = GroupTest.objects.filter(user = user).values(category_name = F('category__name'), pk=F('category_id')).annotate(count=Count('category_name'))
+        print(category_counts)
         return category_counts
     
     def list(self, request, *args, **kwargs):
@@ -117,4 +123,95 @@ class CCInfoListAPIView(generics.ListAPIView):
         serializer = self.get_serializer(queryset, many = True)
         return Response(serializer.data)
     
+
+class SubTestSessionsListAPIView(generics.ListAPIView):
+    serializer_class = SessionsListSerializer
+    permission_classes = [IsInstitute]
+
+    def get_queryset(self):
+        institute = self.request.user
+        sessions = SubTestSession.objects.filter(user = institute)
+        print(sessions)
+        return  sessions
     
+    def get(self, request, *args, **kwargs):
+        queryset = self.get_queryset()
+        serializer = self.get_serializer(queryset, many = True)
+        return Response(serializer.data)
+    
+class GroupTestCategorySessionsListAPIView(generics.ListAPIView):
+    serializer_class = SessionsListSerializer
+    permission_classes = [IsInstitute]
+
+    def get_queryset(self):
+        institute = self.request.user
+        sessions = CategoryTestSession.objects.filter(user = institute)
+        print(sessions)
+        return  sessions
+    
+    def get(self, request, *args, **kwargs):
+        queryset = self.get_queryset()
+        serializer = self.get_serializer(queryset, many = True)
+        return Response(serializer.data)
+
+class CCGroupTestSessionsListAPIView(generics.ListAPIView):
+    serializer_class = SessionsListSerializer
+    permission_classes = [IsInstitute]
+
+    def get_queryset(self):
+        institute = self.request.user
+        sessions = CombinedCategoryTestSession.objects.filter(user = institute)
+        print(sessions)
+        return  sessions
+    
+    def get(self, request, *args, **kwargs):
+        queryset = self.get_queryset()
+        serializer = self.get_serializer(queryset, many = True)
+        return Response(serializer.data)
+
+
+
+class SubTestSessionsDetailedDataListAPIView(generics.ListAPIView):
+    serializer_class = SessionScoresSerializer
+    permission_classes = [IsInstitute]
+    
+    def get_queryset(self):
+        institute = self.request.user
+        session = self.kwargs['session']
+        queryset = SubTestsMarksLibrary.objects.filter(institute = institute, session = session).annotate(name=F('candidate__username')).values('name', 'score')
+        return queryset
+    
+    def list(self, request, *args, **kwargs):
+        queryset = self.get_queryset()
+        serializer = self.get_serializer(queryset, many = True)
+        return Response(serializer.data)
+
+class GroupTestSessionsDetailedDataListAPIView(generics.ListAPIView):
+    serializer_class = SessionScoresSerializer
+    permission_classes = [IsInstitute]
+    
+    def get_queryset(self):
+        institute = self.request.user
+        session = self.kwargs['session']
+        queryset = GroupTestMarksLibrary.objects.filter(institute = institute, session = session).annotate(name=F('candidate__username')).values('name', 'score')
+        return queryset
+    
+    def list(self, request, *args, **kwargs):
+        queryset = self.get_queryset()
+        serializer = self.get_serializer(queryset, many = True)
+        return Response(serializer.data)
+
+class CCGroupTestSessionsDetailedDataListAPIView(generics.ListAPIView):
+    serializer_class = SessionScoresSerializer
+    permission_classes = [IsInstitute]
+    
+    def get_queryset(self):
+        institute = self.request.user
+        session = self.kwargs['session']
+        queryset = CombinedGroupTestMarksLibrary.objects.filter(institute = institute, session = session).annotate(name=F('candidate__username')).values('name', 'score')
+        return queryset
+    
+    def list(self, request, *args, **kwargs):
+        queryset = self.get_queryset()
+        serializer = self.get_serializer(queryset, many = True)
+        return Response(serializer.data)

@@ -52,7 +52,6 @@ class InstituteProfileRetrieveAPIView(generics.RetrieveAPIView):
     permission_classes = [IsInstitute]
 
     def get_object(self):
-        print("coming here")
         user = self.request.user
         profile = InstituteProfile.objects.get(user = user)
         return profile

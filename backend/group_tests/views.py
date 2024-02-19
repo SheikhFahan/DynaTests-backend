@@ -18,13 +18,12 @@ from .serializers import (
 )
 from .models import (GroupTest, GroupTestCombinedCategory, CategoryTestSession,
                     CombinedCategoryTestSession, CategorySessionPassword, CombinedCategorySessionPassword,
-                    
                     )
 
 from .models import (
     GroupTestCategory, EasyQuestion, MediumQuestion, HardQuestion,
     ChoiceForEasyQ, ChoiceForHardQ, ChoiceForMediumQ, SubTestSessionPassword,
-    SubTestSession
+    SubTestSession, CombinedGroupTestMarksLibrary, GroupTestMarksLibrary
 )
 
 from django.contrib.auth.models import User
@@ -32,8 +31,8 @@ from django.contrib.auth.hashers import make_password
 from django.shortcuts import get_object_or_404
 
 from user_profiles.models import Profile
-from user_profiles.user_group_models import (GroupTestAverageScore, GroupTestMarksLibrary, 
-                                             GroupTestScoresLibrary, CombinedGroupTestScoresLibrary, AttendanceCategorySession,
+from user_profiles.user_group_models import (GroupTestAverageScore,
+                                             GroupTestScoresLibrary,  AttendanceCategorySession,
                                              AttendanceCCSession, AttendanceSubTest)
 from tests.serializers import QuestionSerializer, SubmitAnswersSerializer,  CombinedCategoryQuestionSerializer
 
@@ -716,6 +715,7 @@ class SubmitAnswersAPIView(APIView):
         return Response(round(score_percentage, 2))
     
 class SubmitCombinationAnswersAPIView(APIView):
+    # migth wanna save marks in more detail in the future
     permission_classes = [permissions.IsAuthenticated]
     scoring = {
         'easy': 5,
@@ -822,7 +822,7 @@ class SubmitCombinationAnswersAPIView(APIView):
             score_percentage = (total_category_score/max_category_score) *100
             # no of questions can be too small to make changes in the difficulty of upcoming tests
         total_score_percentage = (total_score/max_total_score) *100
-        test_lib = CombinedGroupTestScoresLibrary.objects.create(candidate = user, score = round(total_score_percentage, 2), category = combined_category, institute = institute)
+        test_lib = CombinedGroupTestMarksLibrary.objects.create(candidate = user, score = round(total_score_percentage, 2), category = combined_category, institute = institute)
 
         print(total_score, "this is the total score")
         print(max_total_score, "this is the max total score")
@@ -1085,9 +1085,6 @@ class CombinationCategoryTestSessionQuestionsListAPIView(generics.ListAPIView):
             }
         print(questions_dict, "this is questions dict")
         return questions_dict
-
-
-    
     
     def list(self, request, *args, **kwargs):
         queryset = self.get_queryset()
