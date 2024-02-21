@@ -105,7 +105,7 @@ class GroupTest(models.Model):
     ]
     # change the blank field later
     user = models.ForeignKey(User, on_delete=models.CASCADE)
-    name = models.CharField(max_length=255)
+    name = models.CharField(max_length=255, unique = True)
     # difficulty = models.CharField(max_length=10,choices= DIFFICULTY_CHOICES)
     description = models.TextField()
     category = models.ForeignKey(GroupTestCategory, on_delete=models.CASCADE)
@@ -221,7 +221,7 @@ class SubTestsMarksLibrary(models.Model):
     def __str__(self) :
         return f"{self.institute}, {self.candidate}, {self.session}, {self.score}"
   
-  
+
 class GroupTestMarksLibrary(models.Model):
     """
     saves tests info on sessions
