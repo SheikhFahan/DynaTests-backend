@@ -7,7 +7,8 @@ from .models import (
     ChoiceForMediumQ, ChoiceForHardQ, GroupTestCombinedCategory,
     SubTestSessionPassword, CategoryTestSession, CategorySessionPassword, 
     CombinedCategoryTestSession,CombinedCategorySessionPassword, SubTestSession,
-    GroupTestMarksLibrary, CombinedGroupTestMarksLibrary,  SubTestsMarksLibrary
+    GroupTestMarksLibrary, CombinedGroupTestMarksLibrary,  SubTestsMarksLibrary,
+    SubTestSessionScoreSummary, CategoryTestSessionScoreSummary, CCSessionScoreSummary
 )
 
 admin.site.register(GroupTest)
@@ -28,6 +29,9 @@ admin.site.register(SubTestSession)
 admin.site.register(GroupTestMarksLibrary)
 admin.site.register(CombinedGroupTestMarksLibrary)
 admin.site.register(SubTestsMarksLibrary)
+admin.site.register(SubTestSessionScoreSummary)
+admin.site.register(CategoryTestSessionScoreSummary)
+admin.site.register(CCSessionScoreSummary)
 
 
 

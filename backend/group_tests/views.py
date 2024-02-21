@@ -1,5 +1,6 @@
+# from __future__ import absolute_import, unicode_literals
 from datetime import datetime, timedelta, timezone
-
+from celery import shared_task
 from rest_framework import generics, status
 from rest_framework.response import Response
 from rest_framework.views import APIView     
@@ -17,7 +18,9 @@ from .serializers import (
     CategorySessionAuthenticationSerializer
 )
 from .models import (GroupTest, GroupTestCombinedCategory, CategoryTestSession,
-                    CombinedCategoryTestSession, CategorySessionPassword, CombinedCategorySessionPassword,
+                    CombinedCategoryTestSession, CategorySessionPassword, 
+                    CombinedCategorySessionPassword, SubTestsMarksLibrary, 
+                    GroupTestMarksLibrary,  CombinedGroupTestMarksLibrary
                     )
 
 from .models import (
@@ -127,7 +130,13 @@ class SubTestSessionListCreateAPIView(generics.ListCreateAPIView):
     serializer_class = SubTestSessionSerializer
     permission_classes = [IsInstitute]
 
-    def get_queryset(self):
+    @shared_task
+    def add_session_summary(self, session, institute):
+        session = SubTestSession.objects.get(session = session)
+        summary_object = SubTestsMarksLibrary.objects.filter(institute = institute, session = session)
+        summary_object.update_average_score(session = session, user = institute  )
+
+    def get_queryset(self, sessino ):
         # to send the sessions that belong to the user 
         user = self.request.user
         queryset = SubTestSession.objects.filter(user =user)
@@ -139,7 +148,7 @@ class SubTestSessionListCreateAPIView(generics.ListCreateAPIView):
         print(data)
         sub_test = data.pop('category')
         data['sub_test'] = sub_test
-
+        
         serializer = self.get_serializer(data  =  data)
         if serializer.is_valid():
             session_object = serializer.save(user=self.request.user)

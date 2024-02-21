@@ -97,7 +97,6 @@ class CombinedCategorySessionPassword(models.Model):
 
 
 class GroupTest(models.Model):
-    # add user to it    
     # create check if the choices are more than four
     DIFFICULTY_CHOICES = [
         ('easy', 'Easy'),
@@ -106,7 +105,7 @@ class GroupTest(models.Model):
     ]
     # change the blank field later
     user = models.ForeignKey(User, on_delete=models.CASCADE)
-    name = models.CharField(max_length=255)
+    name = models.CharField(max_length=255, unique = True)
     # difficulty = models.CharField(max_length=10,choices= DIFFICULTY_CHOICES)
     description = models.TextField()
     category = models.ForeignKey(GroupTestCategory, on_delete=models.CASCADE)
@@ -204,30 +203,25 @@ class GroupTestPassword(models.Model):
     test = models.OneToOneField(GroupTestCombinedCategory, on_delete=models.CASCADE, related_name='password_info')
     password = models.CharField(max_length=100)
 
-class SubTestSessionsData(models.Model):
-    user = models.ForeignKey(User, on_delete = models.CASCADE)
-    session = models.ForeignKey(SubTestSession, on_delete = models.SET_NULL, null = True)
-    avg_score = models.IntegerField
+class SubTestsMarksLibrary(models.Model):
+    institute = models.ForeignKey(User, related_name = "institute_subtest_test_marks",  on_delete=models.CASCADE)
+    candidate = models.ForeignKey(User ,related_name = "candidate_subtest_test_marks", on_delete=models.CASCADE)
+    score = models.IntegerField()
+    session = models.ForeignKey(SubTestSession, on_delete=models.CASCADE)
+    timestamp = models.DateTimeField(auto_now=True)
 
-    def __str__(self) -> str:
-        return f'{self.user} {self.session} {self.avg_score}'
-    
-class GroupTestSessionsData(models.Model):
-    user = models.ForeignKey(User, on_delete = models.CASCADE)
-    session = models.ForeignKey(CategoryTestSession, on_delete = models.SET_NULL, null = True)
-    avg_score = models.IntegerField
+    @classmethod
+    def update_average_score(cls, user, session):
+        avg_score = cls.objects.filter(session = session, user = user).aggregate(models.Avg('score'))['score__avg']
+        SubTestSessionScoreSummary.objects.update_or_create(user= user, session = session, defaults={'score' : avg_score} )
 
-    def __str__(self) -> str:
-        return f'{self.user} {self.session} {self.avg_score}'
+    class Meta:
+        unique_together = ['session', 'candidate', 'institute']
 
-class CCTestSessionsData(models.Model):
-    user = models.ForeignKey(User, on_delete = models.CASCADE)
-    session = models.ForeignKey(CombinedCategoryTestSession, on_delete = models.SET_NULL, null = True)
-    avg_score = models.IntegerField
+    def __str__(self) :
+        return f"{self.institute}, {self.candidate}, {self.session}, {self.score}"
+  
 
-    def __str__(self) -> str:
-        return f'{self.user} {self.session} {self.avg_score}'
-    
 class GroupTestMarksLibrary(models.Model):
     """
     saves tests info on sessions
@@ -237,6 +231,11 @@ class GroupTestMarksLibrary(models.Model):
     score = models.IntegerField()
     session = models.ForeignKey(CategoryTestSession, on_delete=models.CASCADE)
     timestamp = models.DateTimeField(auto_now=True)
+
+    @classmethod
+    def update_average_score(cls, user, session):
+        avg_score = cls.objects.filter(session = session, user = user).aggregate(models.Avg('score'))['score__avg']
+        CategoryTestSessionScoreSummary.objects.update_or_create(user= user, session = session, defaults={'score' : avg_score} )
 
     class Meta:
         unique_together = ['session', 'candidate', 'institute']
@@ -252,22 +251,40 @@ class CombinedGroupTestMarksLibrary(models.Model):
     session = models.ForeignKey(CombinedCategoryTestSession, on_delete=models.CASCADE)
     timestamp = models.DateTimeField(auto_now=True)
 
+    @classmethod
+    def update_average_score(cls, user, session):
+        avg_score = cls.objects.filter(session = session, user = user).aggregate(models.Avg('score'))['score__avg']
+        CCSessionScoreSummary.objects.update_or_create(user= user, session = session, defaults={'score' : avg_score} )
+
     class Meta:
         unique_together = ['session', 'candidate', 'institute']
 
     def __str__(self) :
         return f"{self.institute}, {self.candidate}, {self.session}, {self.score}"
-    
-class SubTestsMarksLibrary(models.Model):
-    institute = models.ForeignKey(User, related_name = "institute_subtest_test_marks",  on_delete=models.CASCADE)
-    candidate = models.ForeignKey(User ,related_name = "candidate_subtest_test_marks", on_delete=models.CASCADE)
+      
+class SubTestSessionScoreSummary(models.Model):
+    institute = models.ForeignKey(User, on_delete = models.CASCADE)
+    session = models.ForeignKey(SubTestsMarksLibrary, on_delete = models.CASCADE)
+    # avg score of the whose session 
     score = models.IntegerField()
-    session = models.ForeignKey(SubTestSession, on_delete=models.CASCADE)
-    timestamp = models.DateTimeField(auto_now=True)
 
-    class Meta:
-        unique_together = ['session', 'candidate', 'institute']
-
-    def __str__(self) :
-        return f"{self.institute}, {self.candidate}, {self.session}, {self.score}"
+    def __str__(self):
+        return f"{self.institute} {self.session} {self.score}"
     
+class CategoryTestSessionScoreSummary(models.Model):
+    institute = models.ForeignKey(User, on_delete = models.CASCADE)
+    session = models.ForeignKey(GroupTestMarksLibrary, on_delete = models.CASCADE)
+    # avg score of the whose session 
+    score = models.IntegerField()
+
+    def __str__(self):
+        return f"{self.institute} {self.session} {self.score}"
+    
+class CCSessionScoreSummary(models.Model):
+    institute = models.ForeignKey(User, on_delete = models.CASCADE)
+    session = models.ForeignKey(CombinedGroupTestMarksLibrary, on_delete = models.CASCADE)
+    # avg score of the whose session 
+    score = models.IntegerField()
+
+    def __str__(self):
+        return f"{self.institute} {self.session} {self.score}"
