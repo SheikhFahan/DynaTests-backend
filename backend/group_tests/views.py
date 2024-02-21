@@ -1,3 +1,4 @@
+from __future__ import absolute_import, unicode_literals
 from datetime import datetime, timedelta, timezone
 
 from rest_framework import generics, status
@@ -1093,3 +1094,11 @@ class CombinationCategoryTestSessionQuestionsListAPIView(generics.ListAPIView):
         serializer = self.get_serializer(queryset)
         # print(serializer.data)
         return Response(serializer.data)
+
+
+from celery import shared_task
+
+@shared_task
+def your_task(arg1, arg2):
+    # Your task logic here
+    pass

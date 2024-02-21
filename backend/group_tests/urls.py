@@ -55,7 +55,7 @@ urlpatterns = [
     # db details for questions and categories
     path('subtest_data/', SubTestListAPIVIew.as_view() ),
     path('subtest_detailed_data/', SubTestDetailsListAPIView.as_view() ),
-    path('category_test_data/', GroupCategoryInfoListAPIVIew.as_view() ),
+    # path('category_test_data/', GroupCategoryInfoListAPIVIew.as_view() ),#redundant for now 
     path('category_test_detailed_data/', GroupCategoryDetailsListAPIView.as_view() ),
     path('comprehensive_test_data/', CCInfoListAPIView.as_view() ),
     # test sessions list
