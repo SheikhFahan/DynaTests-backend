@@ -1,6 +1,5 @@
 # from __future__ import absolute_import, unicode_literals
 from datetime import datetime, timedelta, timezone
-from celery import shared_task
 from rest_framework import generics, status
 from rest_framework.response import Response
 from rest_framework.views import APIView     
@@ -9,6 +8,7 @@ from rest_framework import permissions
 from api.permissions import IsInstitute, IsInstituteAndOwner, IsStudent
 
 from . import visualization_api_view
+
 from .serializers import (
     GroupTestSerializer, CategorySerializer, 
     SubTestPasswordSerializer, CombinedCategorySerializer,
@@ -17,10 +17,12 @@ from .serializers import (
     CombinedCategoryTestSessionSerializer, SubTestSessionSerializer,
     CategorySessionAuthenticationSerializer
 )
+from .tasks import add_subtest_session_summary, add_category_test_session_summary, add_cc_session_summary
+
 from .models import (GroupTest, GroupTestCombinedCategory, CategoryTestSession,
                     CombinedCategoryTestSession, CategorySessionPassword, 
-                    CombinedCategorySessionPassword, SubTestsMarksLibrary, 
-                    GroupTestMarksLibrary,  CombinedGroupTestMarksLibrary
+                    CombinedCategorySessionPassword,GroupTestMarksLibrary,
+                    CombinedGroupTestMarksLibrary
                     )
 
 from .models import (
@@ -71,11 +73,13 @@ class CategoryTestSessionListCreateAPIView(generics.ListCreateAPIView):
     
     def create(self, request, *args, **kwargs):
         data = request.data
-        user  = request.user
+        institute  = request.user
         serializer = self.get_serializer(data = data)
         if serializer.is_valid():
-            session_object = serializer.save(user =user)
-    
+            session_object = serializer.save(user =institute)
+            endtime = serializer.validated_data['end_time']
+            add_category_test_session_summary.apply_async(kwargs={'session': session_object.pk, 'institute': institute.pk}, eta=endtime)
+
             # Include the 'pk' of the created object in the response incase password in needed to be saved
             response_data = {
                 'pk': session_object.pk,
@@ -104,13 +108,14 @@ class CombinedCategoryTestSessionListCreateAPIView(generics.ListCreateAPIView):
     def create(self, request, *args, **kwargs):
         # optimization -> get pk from the user
         data = request.data
+        institute = request.user
         combined_category = data.pop('category')
         data['combined_category'] = combined_category
         serializer = self.get_serializer(data  =  data)
         if serializer.is_valid():
-            session_object = serializer.save(user=self.request.user)
-            print(data)
-            print(serializer)
+            session_object = serializer.save(user=institute)
+            endtime = serializer.validated_data['end_time']
+            add_cc_session_summary.apply_async(kwargs={'session': session_object.pk, 'institute': institute.pk}, eta=endtime)
 
             # Include the 'pk' of the created object in the response incase password in needed to be saved
             response_data = {
@@ -130,13 +135,7 @@ class SubTestSessionListCreateAPIView(generics.ListCreateAPIView):
     serializer_class = SubTestSessionSerializer
     permission_classes = [IsInstitute]
 
-    @shared_task
-    def add_session_summary(self, session, institute):
-        session = SubTestSession.objects.get(session = session)
-        summary_object = SubTestsMarksLibrary.objects.filter(institute = institute, session = session)
-        summary_object.update_average_score(session = session, user = institute  )
-
-    def get_queryset(self, sessino ):
+    def get_queryset(self):
         # to send the sessions that belong to the user 
         user = self.request.user
         queryset = SubTestSession.objects.filter(user =user)
@@ -148,11 +147,13 @@ class SubTestSessionListCreateAPIView(generics.ListCreateAPIView):
         print(data)
         sub_test = data.pop('category')
         data['sub_test'] = sub_test
+        institute = request.user
         
         serializer = self.get_serializer(data  =  data)
         if serializer.is_valid():
-            session_object = serializer.save(user=self.request.user)
-
+            session_object = serializer.save(user=institute)
+            endtime = serializer.validated_data['end_time']
+            add_subtest_session_summary.apply_async(kwargs={'session': session_object.pk, 'institute': institute.pk}, eta=endtime)
             # Include the 'pk' of the created object in the response incase password in needed to be saved
             response_data = {
                 'pk': session_object.pk,
@@ -785,7 +786,7 @@ class SubmitCombinationAnswersAPIView(APIView):
         institute = User.objects.get(pk = institute)
 
 
-        # max score possible for the whole test
+        # max score possible for the whole 
         max_total_score = self.get_max_total_score(questions_count_dict)
 
         # total_score scored by the user in the test

@@ -210,11 +210,6 @@ class SubTestsMarksLibrary(models.Model):
     session = models.ForeignKey(SubTestSession, on_delete=models.CASCADE)
     timestamp = models.DateTimeField(auto_now=True)
 
-    @classmethod
-    def update_average_score(cls, user, session):
-        avg_score = cls.objects.filter(session = session, user = user).aggregate(models.Avg('score'))['score__avg']
-        SubTestSessionScoreSummary.objects.update_or_create(user= user, session = session, defaults={'score' : avg_score} )
-
     class Meta:
         unique_together = ['session', 'candidate', 'institute']
 
@@ -232,11 +227,6 @@ class GroupTestMarksLibrary(models.Model):
     session = models.ForeignKey(CategoryTestSession, on_delete=models.CASCADE)
     timestamp = models.DateTimeField(auto_now=True)
 
-    @classmethod
-    def update_average_score(cls, user, session):
-        avg_score = cls.objects.filter(session = session, user = user).aggregate(models.Avg('score'))['score__avg']
-        CategoryTestSessionScoreSummary.objects.update_or_create(user= user, session = session, defaults={'score' : avg_score} )
-
     class Meta:
         unique_together = ['session', 'candidate', 'institute']
 
@@ -251,11 +241,6 @@ class CombinedGroupTestMarksLibrary(models.Model):
     session = models.ForeignKey(CombinedCategoryTestSession, on_delete=models.CASCADE)
     timestamp = models.DateTimeField(auto_now=True)
 
-    @classmethod
-    def update_average_score(cls, user, session):
-        avg_score = cls.objects.filter(session = session, user = user).aggregate(models.Avg('score'))['score__avg']
-        CCSessionScoreSummary.objects.update_or_create(user= user, session = session, defaults={'score' : avg_score} )
-
     class Meta:
         unique_together = ['session', 'candidate', 'institute']
 
@@ -264,7 +249,7 @@ class CombinedGroupTestMarksLibrary(models.Model):
       
 class SubTestSessionScoreSummary(models.Model):
     institute = models.ForeignKey(User, on_delete = models.CASCADE)
-    session = models.ForeignKey(SubTestsMarksLibrary, on_delete = models.CASCADE)
+    session = models.ForeignKey(SubTestSession, on_delete = models.CASCADE)
     # avg score of the whose session 
     score = models.IntegerField()
 
@@ -273,7 +258,7 @@ class SubTestSessionScoreSummary(models.Model):
     
 class CategoryTestSessionScoreSummary(models.Model):
     institute = models.ForeignKey(User, on_delete = models.CASCADE)
-    session = models.ForeignKey(GroupTestMarksLibrary, on_delete = models.CASCADE)
+    session = models.ForeignKey(CategoryTestSession, on_delete = models.CASCADE)
     # avg score of the whose session 
     score = models.IntegerField()
 
@@ -282,7 +267,7 @@ class CategoryTestSessionScoreSummary(models.Model):
     
 class CCSessionScoreSummary(models.Model):
     institute = models.ForeignKey(User, on_delete = models.CASCADE)
-    session = models.ForeignKey(CombinedGroupTestMarksLibrary, on_delete = models.CASCADE)
+    session = models.ForeignKey(CombinedCategoryTestSession, on_delete = models.CASCADE)
     # avg score of the whose session 
     score = models.IntegerField()
 
