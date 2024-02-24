@@ -139,7 +139,7 @@ class SubTestSessionPassword(models.Model):
 
 class EasyQuestion(models.Model):
     test = models.ForeignKey(GroupTest, on_delete=models.CASCADE, related_name = 'easy_question')
-    text = models.TextField()
+    text = models.TextField(max_length = 1000)
     category = models.ForeignKey(GroupTestCategory, on_delete=models.CASCADE, null = True, blank = True, related_name = 'easy_question')
 
     def save(self, *args, **kwargs):
