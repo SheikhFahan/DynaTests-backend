@@ -26,7 +26,6 @@ SECRET_KEY = os.environ.get('SECRET_KEY')
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = str(os.environ.get('DEBUG')) == "1"
 ALLOWED_HOSTS = ['127.0.0.1', 'localhost','dyna-tests-backend-lovat.vercel.app', '.vercel.app'] 
-    
 
 # Application definition
 
@@ -50,6 +49,7 @@ INSTALLED_APPS = [
     'corsheaders',
     # celery and dependencies,
     'celery',    
+    # 'django_celery_beat',
 
 ]
 
@@ -210,6 +210,6 @@ EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD')
 EMAIL_PORT = os.environ.get('EMAIL_PORT')
 EMAIL_USE_TLS = os.environ.get('EMAIL_PORT')
 
+# celery beat settings
 
-CELERY_BROKER_URL = 'amqp://guest:guest@localhost'  # RabbitMQ URL
-# CELERY_RESULT_BACKEND = 'rpc://' 
+# CELERY_BEAT_SCHEDULER = 'django_celery_beat.schedulers:DatabaseScheduler'
