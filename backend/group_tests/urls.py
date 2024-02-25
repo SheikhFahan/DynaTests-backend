@@ -13,8 +13,8 @@ from .views import (
 )
 
 from .visualization_api_view import (
-    SubTestListAPIVIew, SubTestDetailsListAPIView,GroupCategoryInfoListAPIVIew,
-    GroupCategoryDetailsListAPIView, CCInfoListAPIView,SubTestSessionsListAPIView,
+    SubTestListAPIVIew, SubTestDetailsListAPIView, GroupCategoryDetailsListAPIView,
+     CCInfoListAPIView,SubTestSessionsListAPIView,
     GroupTestCategorySessionsListAPIView, CCGroupTestSessionsListAPIView, SubTestSessionsDetailedDataListAPIView,
     GroupTestSessionsDetailedDataListAPIView, CCGroupTestSessionsDetailedDataListAPIView
 )

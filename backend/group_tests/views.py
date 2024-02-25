@@ -262,7 +262,7 @@ class GroupTestListCreateAPIView(generics.ListCreateAPIView):
         serializer = GroupTestSerializer(data = data, context = {'request' : request})
         if serializer.is_valid():
             group_test_object = serializer.save(user=request.user)
-
+            
             # Include the 'pk' of the created object in the response incase password in needed to be saved
             response_data = {
                 'pk': group_test_object.pk,
