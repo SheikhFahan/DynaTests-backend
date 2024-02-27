@@ -211,4 +211,4 @@ EMAIL_USE_TLS = os.environ.get('EMAIL_PORT')
 
 # celery beat settings
 
-# CELERY_BEAT_SCHEDULER = 'django_celery_beat.schedulers:DatabaseScheduler'
+# CELERY_BEAT_SCHEDULER = '2024-02-27 07:04:10.541706+00:00 100 2024-02-29 05:38:50+00:00 the time stuff is here

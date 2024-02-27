@@ -178,7 +178,9 @@ class SubTestSessionsDetailedDataListAPIView(generics.ListAPIView):
     def get_queryset(self):
         institute = self.request.user
         session = self.kwargs['session']
+        print(3, institute)
         queryset = SubTestsMarksLibrary.objects.filter(institute = institute, session = session).annotate(name=F('candidate__username')).values('name', 'score')
+        print(queryset, "here is the data")
         return queryset
     
     def list(self, request, *args, **kwargs):
@@ -194,11 +196,15 @@ class GroupTestSessionsDetailedDataListAPIView(generics.ListAPIView):
         institute = self.request.user
         session = self.kwargs['session']
         queryset = GroupTestMarksLibrary.objects.filter(institute = institute, session = session).annotate(name=F('candidate__username')).values('name', 'score')
+        print(queryset)
+
         return queryset
     
     def list(self, request, *args, **kwargs):
         queryset = self.get_queryset()
         serializer = self.get_serializer(queryset, many = True)
+        print(queryset)
+        
         return Response(serializer.data)
 
 class CCGroupTestSessionsDetailedDataListAPIView(generics.ListAPIView):
