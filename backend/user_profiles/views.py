@@ -52,7 +52,6 @@ class InstituteProfileRetrieveAPIView(generics.RetrieveAPIView):
     permission_classes = [IsInstitute]
 
     def get_object(self):
-        print("coming here")
         user = self.request.user
         profile = InstituteProfile.objects.get(user = user)
         return profile
@@ -67,7 +66,6 @@ class UserAttemptedCategoriesDataAPIView(generics.ListAPIView):
         profile = Profile.objects.get(user = user)
         # gets the categories from the tests the user has attempted
         category_counts = TestMarksLibrary.objects.filter(profile = profile).values(category_name = F('category__name'), pk=F('category_id')).annotate(count=Count('category'))
-        print(category_counts)
         return category_counts
     
     def list(self, request, *args, **kwargs):

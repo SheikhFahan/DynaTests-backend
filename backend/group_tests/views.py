@@ -1,11 +1,13 @@
+# from __future__ import absolute_import, unicode_literals
 from datetime import datetime, timedelta, timezone
-
 from rest_framework import generics, status
 from rest_framework.response import Response
 from rest_framework.views import APIView     
 from rest_framework import permissions
 
 from api.permissions import IsInstitute, IsInstituteAndOwner, IsStudent
+
+from . import visualization_api_view
 
 from .serializers import (
     GroupTestSerializer, CategorySerializer, 
@@ -15,15 +17,18 @@ from .serializers import (
     CombinedCategoryTestSessionSerializer, SubTestSessionSerializer,
     CategorySessionAuthenticationSerializer
 )
+from .tasks import add_subtest_session_summary, add_category_test_session_summary, add_cc_session_summary
+
 from .models import (GroupTest, GroupTestCombinedCategory, CategoryTestSession,
-                    CombinedCategoryTestSession, CategorySessionPassword, CombinedCategorySessionPassword,
-                    
+                    CombinedCategoryTestSession, CategorySessionPassword, 
+                    CombinedCategorySessionPassword,GroupTestMarksLibrary,
+                    CombinedGroupTestMarksLibrary
                     )
 
 from .models import (
     GroupTestCategory, EasyQuestion, MediumQuestion, HardQuestion,
     ChoiceForEasyQ, ChoiceForHardQ, ChoiceForMediumQ, SubTestSessionPassword,
-    SubTestSession
+    SubTestSession, CombinedGroupTestMarksLibrary, GroupTestMarksLibrary, SubTestsMarksLibrary
 )
 
 from django.contrib.auth.models import User
@@ -31,9 +36,9 @@ from django.contrib.auth.hashers import make_password
 from django.shortcuts import get_object_or_404
 
 from user_profiles.models import Profile
-from user_profiles.user_group_models import (GroupTestAverageScore, GroupTestMarksLibrary, 
-                                             GroupTestScoresLibrary, CombinedGroupTestScoresLibrary, AttendanceCategorySession,
-                                             AttendanceCCSession, AttendanceSubTest)
+from user_profiles.user_group_models import (GroupTestAverageScore,
+                                             GroupTestScoresLibrary,  AttendanceCategorySession,
+                                             AttendanceCCSession, AttendanceSubTest, )
 from tests.serializers import QuestionSerializer, SubmitAnswersSerializer,  CombinedCategoryQuestionSerializer
 
 
@@ -48,8 +53,10 @@ class GroupTestCategoryListCreateAPIView(generics.ListCreateAPIView):
         return queryset
 
     def perform_create(self, serializer):
+        print(serializer)
         name = self.request.data.get('name', "")
         serializer.save(user = self.request.user)
+        
         return Response({'message': f'{name} Object created successfully'}, status=status.HTTP_201_CREATED)
     
 
@@ -68,11 +75,13 @@ class CategoryTestSessionListCreateAPIView(generics.ListCreateAPIView):
     
     def create(self, request, *args, **kwargs):
         data = request.data
-        user  = request.user
+        institute  = request.user
         serializer = self.get_serializer(data = data)
         if serializer.is_valid():
-            session_object = serializer.save(user =user)
-    
+            session_object = serializer.save(user =institute)
+            endtime = serializer.validated_data['end_time']
+            add_category_test_session_summary.apply_async(kwargs={'session': session_object.pk, 'institute': institute.pk}, eta=endtime)
+
             # Include the 'pk' of the created object in the response incase password in needed to be saved
             response_data = {
                 'pk': session_object.pk,
@@ -101,13 +110,14 @@ class CombinedCategoryTestSessionListCreateAPIView(generics.ListCreateAPIView):
     def create(self, request, *args, **kwargs):
         # optimization -> get pk from the user
         data = request.data
+        institute = request.user
         combined_category = data.pop('category')
         data['combined_category'] = combined_category
         serializer = self.get_serializer(data  =  data)
         if serializer.is_valid():
-            session_object = serializer.save(user=self.request.user)
-            print(data)
-            print(serializer)
+            session_object = serializer.save(user=institute)
+            endtime = serializer.validated_data['end_time']
+            add_cc_session_summary.apply_async(kwargs={'session': session_object.pk, 'institute': institute.pk}, eta=endtime)
 
             # Include the 'pk' of the created object in the response incase password in needed to be saved
             response_data = {
@@ -139,11 +149,13 @@ class SubTestSessionListCreateAPIView(generics.ListCreateAPIView):
         print(data)
         sub_test = data.pop('category')
         data['sub_test'] = sub_test
-
+        institute = request.user
+        
         serializer = self.get_serializer(data  =  data)
         if serializer.is_valid():
-            session_object = serializer.save(user=self.request.user)
-
+            session_object = serializer.save(user=institute)
+            endtime = serializer.validated_data['end_time']
+            add_subtest_session_summary.apply_async(kwargs={'session': session_object.pk, 'institute': institute.pk}, eta=endtime)
             # Include the 'pk' of the created object in the response incase password in needed to be saved
             response_data = {
                 'pk': session_object.pk,
@@ -252,6 +264,7 @@ class GroupTestListCreateAPIView(generics.ListCreateAPIView):
         serializer = GroupTestSerializer(data = data, context = {'request' : request})
         if serializer.is_valid():
             group_test_object = serializer.save(user=request.user)
+            
             # Include the 'pk' of the created object in the response incase password in needed to be saved
             response_data = {
                 'pk': group_test_object.pk,
@@ -546,14 +559,17 @@ class SubTestAnswerSubmitAPIView(APIView):
         user = request.user
         print("inside suibmit answers")
         serializer = SubmitAnswersSerializer(data =data)
-        if serializer.is_valid(raise_exception=True):
+        if serializer.is_valid():
             validated_data = serializer.validated_data
-        
+        else:
+            print(serializer.errors)
+        print(request.data)
         session_id  = validated_data['session']
         unique_id = validated_data['unique_id']    
-
+        print(unique_id)
         # checks the time constraint for the test
         start_time  = AttendanceSubTest.objects.get(candidate = user,  session  = session_id, unique_id = unique_id).start_time.replace(tzinfo=timezone.utc)
+        print(start_time)
         sub_test_session  = SubTestSession.objects.get(pk = session_id)
         duration = sub_test_session.duration
         end_time = sub_test_session.end_time.replace(tzinfo=timezone.utc)
@@ -569,9 +585,11 @@ class SubTestAnswerSubmitAPIView(APIView):
         hard = validated_data['choices']['hard']
         inst = User.objects.get(pk = validated_data['institute'])
         category = sub_test_session.sub_test.category
+        session = SubTestSession.objects.get(pk = session_id)
 
         total_score = self.get_total_score(validated_data['count'])
         score = 0
+        print('here')
         try:
             
             for answer in easy:
@@ -595,11 +613,14 @@ class SubTestAnswerSubmitAPIView(APIView):
                 if is_correct:
                     score+=self.scoring['hard']
             score_percentage = (score/total_score) * 100
+            print("here")
         
         except :
+            print("here?")
             return Response({'detail': 'Question or Choice does not exist'}, status=status.HTTP_404_NOT_FOUND)
-        GroupTestMarksLibrary.objects.create(institute = inst, candidate = user, score = score, category = category)
-        print(score_percentage)
+        print("here ")
+        SubTestsMarksLibrary.objects.create(institute = inst, candidate = user, score = score, session = session)
+        print("not here ")
 
         test_lib = GroupTestScoresLibrary.objects.create(institute = inst, candidate = user, score = score_percentage, category = category )
         
@@ -611,7 +632,7 @@ class SubTestAnswerSubmitAPIView(APIView):
 class SubmitAnswersAPIView(APIView):
     # optimzie on taking input "category" -> no need ot fetch the category from the question object
     # check for answers, update the avg score, update the score
-    permission_classes = [permissions.IsAuthenticated]
+    # permission_classes = IsStudent
     # change this as a dynamic field depending on the actual test
     scoring = {
         'easy': 5,
@@ -646,12 +667,14 @@ class SubmitAnswersAPIView(APIView):
     def post(self, request, *args, **kwargs):
         # evaluates the choices selected for the answers
         # suggestion send the choices directly instead of sending them as (easy, mid, hard) and get the difficulty in the backend 
+
         data = request.data
         user = request.user
         serializer = SubmitAnswersSerializer(data =data)
-
-        if serializer.is_valid(raise_exception=True):
+        if serializer.is_valid():
             validated_data = serializer.validated_data
+        else:
+            print(serializer.errors)
 
         session_id  = validated_data['session']
         unique_id = validated_data['unique_id']    
@@ -666,6 +689,7 @@ class SubmitAnswersAPIView(APIView):
         print(start_time, duration, end_time, "the time stuff is here" )
 
         if not (start_time <= current_time <= (start_time + timedelta(minutes= duration)) <= end_time):
+            print("session expired")
             return Response({'detail': 'Test submission not allowed at this time.'}, status=status.HTTP_403_FORBIDDEN)
 
 
@@ -675,8 +699,10 @@ class SubmitAnswersAPIView(APIView):
         inst = User.objects.get(pk = validated_data['institute'])
         category = self.get_category(easy, medium, hard)
         total_score = self.get_total_score(validated_data['count'])
-        score = 0
+        session = CategoryTestSession.objects.get(pk = session_id)
+        print(easy)
 
+        score = 0
         try:
             
             for answer in easy:
@@ -700,20 +726,23 @@ class SubmitAnswersAPIView(APIView):
                 if is_correct:
                     score+=self.scoring['hard']
             score_percentage = (score/total_score) * 100
-           
-        except :
-            return Response({'detail': 'Question or Choice does not exist'}, status=status.HTTP_404_NOT_FOUND)
-        GroupTestMarksLibrary.objects.create(institute = inst, candidate = user, score = score, category = category)
-        print(score_percentage)
+            print(score_percentage)
 
+           
+        except Exception:
+            return Response({'detail': 'Question or Choice does not exist'}, status=status.HTTP_404_NOT_FOUND)
+        GroupTestMarksLibrary.objects.create(institute = inst, candidate = user, score = score, session = session)
         test_lib = GroupTestScoresLibrary.objects.create(institute = inst, candidate = user, score = score_percentage, category = category )
         
         if score_percentage > 40:
+            pass
             test_lib.update_average_score(institute = inst, candidate = user,  category=category)
+        print("fine till here")
         print(round(score_percentage, 2))
         return Response(round(score_percentage, 2))
     
 class SubmitCombinationAnswersAPIView(APIView):
+    # migth wanna save marks in more detail in the future
     permission_classes = [permissions.IsAuthenticated]
     scoring = {
         'easy': 5,
@@ -774,7 +803,7 @@ class SubmitCombinationAnswersAPIView(APIView):
         institute = User.objects.get(pk = institute)
 
 
-        # max score possible for the whole test
+        # max score possible for the whole 
         max_total_score = self.get_max_total_score(questions_count_dict)
 
         # total_score scored by the user in the test
@@ -820,7 +849,7 @@ class SubmitCombinationAnswersAPIView(APIView):
             score_percentage = (total_category_score/max_category_score) *100
             # no of questions can be too small to make changes in the difficulty of upcoming tests
         total_score_percentage = (total_score/max_total_score) *100
-        test_lib = CombinedGroupTestScoresLibrary.objects.create(candidate = user, score = round(total_score_percentage, 2), category = combined_category, institute = institute)
+        test_lib = CombinedGroupTestMarksLibrary.objects.create(candidate = user, score = round(total_score_percentage, 2), category = combined_category, institute = institute)
 
         print(total_score, "this is the total score")
         print(max_total_score, "this is the max total score")
@@ -1083,9 +1112,6 @@ class CombinationCategoryTestSessionQuestionsListAPIView(generics.ListAPIView):
             }
         print(questions_dict, "this is questions dict")
         return questions_dict
-
-
-    
     
     def list(self, request, *args, **kwargs):
         queryset = self.get_queryset()

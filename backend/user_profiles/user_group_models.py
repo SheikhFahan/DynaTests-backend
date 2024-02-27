@@ -2,7 +2,7 @@ from django.db import models
 from django.contrib.auth.models import User
 
 from group_tests.models import (GroupTestCategory, GroupTestCombinedCategory, SubTestSession,
-                                CategoryTestSession, CombinedCategoryTestSession)
+                                CategoryTestSession, CombinedCategoryTestSession,)
 
 # change profile to user as the foreign key relation
 
@@ -58,6 +58,8 @@ class AttendanceCCSession(models.Model):
     
 class GroupTestScoresLibrary(models.Model):
     """
+    score -> class name  -> percentage
+    for the use of the student 
     saves the percentage score  to create dynamic question_sets and generate the avg test score 
     """
     institute = models.ForeignKey(User, related_name = "institute_group_test_library",  on_delete=models.CASCADE)
@@ -91,24 +93,3 @@ class GroupTestAverageScore(models.Model):
     def __str__(self) :
         return f"{self.institute}, {self.candidate}, {self.category}, {self.avg_score}"
     
-class GroupTestMarksLibrary(models.Model):
-    institute = models.ForeignKey(User, related_name = "institute_group_test_marks_lib",  on_delete=models.CASCADE)
-    candidate = models.ForeignKey(User ,related_name = "candidate_group_test_marks_lib", on_delete=models.CASCADE)
-    score = models.IntegerField()
-    category = models.ForeignKey(GroupTestCategory, on_delete=models.CASCADE)
-    timestamp = models.DateTimeField(auto_now=True)
-
-    def __str__(self) :
-        return f"{self.institute}, {self.candidate}, {self.category}, {self.score}"
-
-
-class CombinedGroupTestScoresLibrary(models.Model):
-    institute = models.ForeignKey(User, related_name = "institute_group_test_combined_scores",  on_delete=models.CASCADE)
-    candidate = models.ForeignKey(User ,related_name = "candidate_group_test_scores", on_delete=models.CASCADE)
-    score = models.IntegerField()
-    category = models.ForeignKey(GroupTestCombinedCategory, on_delete=models.CASCADE)
-    timestamp = models.DateTimeField(auto_now=True)
-
-    def __str__(self) :
-        return f"{self.institute}, {self.candidate}, {self.category}, {self.score}"
-

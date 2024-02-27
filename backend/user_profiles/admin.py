@@ -2,8 +2,9 @@ from django.contrib import admin
 
 from .models import Profile, TestScoresLibrary, AverageScore, TestMarksLibrary, CombinedTestScoresLibrary, QuestionStatistics
 from .user_group_models import  (
-    GroupTestScoresLibrary, GroupTestAverageScore, GroupTestMarksLibrary, CombinedGroupTestScoresLibrary,  
+    GroupTestScoresLibrary, GroupTestAverageScore, 
     InstituteProfile, AttendanceSubTest, AttendanceCategorySession, AttendanceCCSession,
+    
 )
 
 
@@ -14,8 +15,6 @@ admin.site.register(TestMarksLibrary)
 admin.site.register(CombinedTestScoresLibrary)
 admin.site.register(GroupTestScoresLibrary)
 admin.site.register(GroupTestAverageScore)
-admin.site.register(GroupTestMarksLibrary)
-admin.site.register(CombinedGroupTestScoresLibrary)
 admin.site.register(InstituteProfile)
 admin.site.register(AttendanceSubTest)
 admin.site.register(AttendanceCategorySession)

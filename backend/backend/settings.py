@@ -18,16 +18,13 @@ from datetime import timedelta
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 
-# Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = os.environ.get('SECRET_KEY')
-
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = str(os.environ.get('DEBUG')) == "1"
 ALLOWED_HOSTS = ['127.0.0.1', 'localhost','dyna-tests-backend-lovat.vercel.app', '.vercel.app'] 
-    
 
 # Application definition
 
@@ -49,6 +46,9 @@ INSTALLED_APPS = [
     'rest_framework_simplejwt.token_blacklist',
     #cors headers 
     'corsheaders',
+    # celery and dependencies,
+    'celery',    
+    # 'django_celery_beat',
 
 ]
 
@@ -208,3 +208,7 @@ EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER')
 EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD')
 EMAIL_PORT = os.environ.get('EMAIL_PORT')
 EMAIL_USE_TLS = os.environ.get('EMAIL_PORT')
+
+# celery beat settings
+
+# CELERY_BEAT_SCHEDULER = '2024-02-27 07:04:10.541706+00:00 100 2024-02-29 05:38:50+00:00 the time stuff is here
