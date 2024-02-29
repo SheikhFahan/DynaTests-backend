@@ -196,8 +196,6 @@ class GroupTestSessionsDetailedDataListAPIView(generics.ListAPIView):
         institute = self.request.user
         session = self.kwargs['session']
         queryset = GroupTestMarksLibrary.objects.filter(institute = institute, session = session).annotate(name=F('candidate__username')).values('name', 'score')
-        print(queryset)
-
         return queryset
     
     def list(self, request, *args, **kwargs):

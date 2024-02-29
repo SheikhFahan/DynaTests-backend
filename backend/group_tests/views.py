@@ -700,11 +700,8 @@ class SubmitAnswersAPIView(APIView):
         category = self.get_category(easy, medium, hard)
         total_score = self.get_total_score(validated_data['count'])
         session = CategoryTestSession.objects.get(pk = session_id)
-        print(easy)
-
         score = 0
         try:
-            
             for answer in easy:
                 choice_id = answer['answer_id']
                 selected_choice = ChoiceForEasyQ.objects.get(pk = choice_id)
@@ -726,7 +723,6 @@ class SubmitAnswersAPIView(APIView):
                 if is_correct:
                     score+=self.scoring['hard']
             score_percentage = (score/total_score) * 100
-            print(score_percentage)
 
            
         except Exception:
