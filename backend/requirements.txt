@@ -42,6 +42,8 @@ urllib3==2.1.0
 websockets==11.0.3
 wheel==0.41.2
 celery==5.3.6
-django-celery-beat==2.5.0
+redis >=5.0.2
+gunicorn >= 21.2.0
+
 
 

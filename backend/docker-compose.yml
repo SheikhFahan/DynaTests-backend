@@ -1,0 +1,28 @@
+version : "3.8"
+services : 
+  redis:
+    image: redis:alpine
+    container_name: redis
+
+  app:
+    restart: always
+    build: .
+    volumes:
+      - .:/dynatest_backend
+    ports:
+      - 8000:8000
+    image: app:dynatests-backend
+    container_name: backend_container
+    command:  gunicorn backend.wsgi:application
+
+  celery:
+      restart: always
+      build: 
+        context: .
+      command: celery -A backend worker --loglevel=info
+      volumes:
+        - .:/dynatest_backend
+      container_name: celery
+      depends_on:
+        - app
+        - redis
