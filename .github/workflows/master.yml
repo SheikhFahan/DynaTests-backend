@@ -12,7 +12,6 @@ concurrency:
 jobs:
   deploy:
     name: Deploy
-    needs: quality-assurance
     runs-on: ubuntu-latest
     steps:
       - name: Configure SSH
