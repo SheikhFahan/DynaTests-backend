@@ -33,4 +33,4 @@ jobs:
           END
       - name: Run deploy
         run: |
-          ssh target "cd DynaTests-backend/ && docker-compose down && git pull && docker-compose build && docker-compose up -d --force-recreate"
+          ssh target "cd DynaTests-backend/ && docker compose down && git pull && docker compose build && docker compose up -d --force-recreate"
