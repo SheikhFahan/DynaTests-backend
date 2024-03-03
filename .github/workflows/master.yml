@@ -19,22 +19,22 @@ jobs:
           SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
           SSH_HOST: ${{ secrets.SSH_HOST }}
           SSH_USER: ${{ secrets.SSH_USER }}
-          ALLOWED_HOSTS: ${{ secrets.ALLOWED_HOSTS }}
-          SECRET_KEY: ${{ secrets.SECRET_KEY }}
-          DB_USER: ${{ secrets.DB_USER }}
-          DEBUG: ${{ secrets.DEBUG }}
-          ENGINE: ${{ secrets.ENGINE }}
-          HOST: ${{ secrets.HOST }}
-          NAME: ${{ secrets.NAME }}
-          PASSWORD: ${{ secrets.PASSWORD }}
-          PORT: ${{ secrets.PORT }}
-          EMAIL_BACKEND: ${{ secrets.EMAIL_BACKEND }}
-          EMAIL_FROM: ${{ secrets.EMAIL_FROM }}
-          EMAIL_HOST: ${{ secrets.EMAIL_HOST }}
-          EMAIL_HOST_PASSWORD: ${{ secrets.EMAIL_HOST_PASSWORD }}
-          EMAIL_HOST_USER: ${{ secrets.EMAIL_HOST_USER }}
-          EMAIL_USE_TLS: ${{ secrets.EMAIL_USE_TLS }}
-          EMAIL_PORT: ${{ secrets.EMAIL_PORT }}
+          # ALLOWED_HOSTS: ${{ secrets.ALLOWED_HOSTS }}
+          # SECRET_KEY: ${{ secrets.SECRET_KEY }}
+          # DB_USER: ${{ secrets.DB_USER }}
+          # DEBUG: ${{ secrets.DEBUG }}
+          # ENGINE: ${{ secrets.ENGINE }}
+          # HOST: ${{ secrets.HOST }}
+          # NAME: ${{ secrets.NAME }}
+          # PASSWORD: ${{ secrets.PASSWORD }}
+          # PORT: ${{ secrets.PORT }}
+          # EMAIL_BACKEND: ${{ secrets.EMAIL_BACKEND }}
+          # EMAIL_FROM: ${{ secrets.EMAIL_FROM }}
+          # EMAIL_HOST: ${{ secrets.EMAIL_HOST }}
+          # EMAIL_HOST_PASSWORD: ${{ secrets.EMAIL_HOST_PASSWORD }}
+          # EMAIL_HOST_USER: ${{ secrets.EMAIL_HOST_USER }}
+          # EMAIL_USE_TLS: ${{ secrets.EMAIL_USE_TLS }}
+          # EMAIL_PORT: ${{ secrets.EMAIL_PORT }}
         run: |
           mkdir -p ~/.ssh/
           echo "$SSH_PRIVATE_KEY" > ~/.ssh/github
