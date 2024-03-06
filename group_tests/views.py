@@ -858,6 +858,7 @@ class SubTestSessionQuestionsListAPIView(generics.ListAPIView):
     # solve conflict for category and combined category
     serializer_class = QuestionSerializer
 
+
     def get_counts(self, user_score, total_questions_count):
         for score_range, weights in self.weight_ranges.items():
             if score_range[0] <= user_score < score_range[1]:

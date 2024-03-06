@@ -66,7 +66,7 @@ class GroupCategoryInfoListAPIVIew(generics.ListAPIView):
     def get_queryset(self):
         user  = self.request.user
         # the pk might give errors because of the annotation problems
-        category_counts = GroupTestCategory.objects.filter(user = 5).values(category_name = F('name'), pk=F('pk'))
+        category_counts = GroupTestCategory.objects.filter(user = user).values(category_name = F('name'), pk=F('pk'))
         return category_counts
     
     def list(self, request, *args, **kwargs):
@@ -178,9 +178,7 @@ class SubTestSessionsDetailedDataListAPIView(generics.ListAPIView):
     def get_queryset(self):
         institute = self.request.user
         session = self.kwargs['session']
-        print(3, institute)
         queryset = SubTestsMarksLibrary.objects.filter(institute = institute, session = session).annotate(name=F('candidate__username')).values('name', 'score')
-        print(queryset, "here is the data")
         return queryset
     
     def list(self, request, *args, **kwargs):
