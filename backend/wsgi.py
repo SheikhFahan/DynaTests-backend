@@ -11,7 +11,12 @@ import os
 import dotenv
 
 from django.core.wsgi import get_wsgi_application
-dotenv.read_dotenv(os.path.join(os.path.dirname(os.path.dirname(__file__)), '.env'))
+PROJECT_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
+
+# Load environment variables from the .env file
+env_file = os.path.join(PROJECT_DIR, '.env')
+dotenv.read_dotenv(env_file)
+
 
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'backend.settings')
 

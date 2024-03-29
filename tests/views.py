@@ -48,7 +48,7 @@ class CCListCreateAPIView(generics.ListCreateAPIView):
             return Response({'error': 'Only admins can create categories.'}, status=status.HTTP_403_FORBIDDEN)
         serializer.save(user = self.request.user)
 
-class CombinationTestQuestionsListSerializerAPIView(generics.ListAPIView):
+class CombinationTestQuestionsListAPIView(generics.ListAPIView):
     serializer_class = CombinedCategoryQuestionSerializer
     # serializer_class = QuestionSerializer
     # queryset = CombinedTestCategory.objects.all()
@@ -75,9 +75,6 @@ class CombinationTestQuestionsListSerializerAPIView(generics.ListAPIView):
 
         # Formula for getting the number of questions per category for the test
         total_weight = easy_weight + medium_weight + hard_weight
-        if total_weight == 0:
-            # Avoid division by zero
-            return 0, 0, 0
 
         easy_questions_count = int((easy_weight / total_weight) * total_questions_count)
         medium_questions_count = int((medium_weight / total_weight) * total_questions_count)
@@ -210,7 +207,6 @@ class QuestionsRetrieveAPIView(generics.ListAPIView):
         easy_questions_count = int((easy_weight/(easy_weight + medium_weight + hard_weight)*total_questions_count))
         medium_questions_count = int((medium_weight/(easy_weight + medium_weight + hard_weight)*total_questions_count))
         hard_questions_count = int((hard_weight/(easy_weight + medium_weight + hard_weight)*total_questions_count))
-        print(easy_questions_count, medium_questions_count, hard_questions_count)
 
         return easy_questions_count, medium_questions_count, hard_questions_count
     
